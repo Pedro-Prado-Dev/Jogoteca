@@ -3,6 +3,9 @@ from jogoteca import app
 from jogoteca import db
 from model import Jogos
 from model import Usuarios
+from helpers import recupera_imagem
+from helpers import deleta_arquivo
+import time
 
 
 @app.route('/')
@@ -22,7 +25,8 @@ def editar(id):
         return redirect(url_for('login', next_page=url_for('editar')))
     
     jogo = Jogos.query.filter_by(id=id).first()
-    return render_template('editar.html', titulo='Editando Jogo', jogo=jogo)
+    capa_jogo = recupera_imagem(id=id)
+    return render_template('editar.html', titulo='Editando Jogo', jogo=jogo, capa_jogo=capa_jogo)
 
 @app.route('/create',methods=['POST'])
 def create():
@@ -41,7 +45,8 @@ def create():
     
     arquivo = request.files['arquivo']
     upload_path = app.config['UPLOAD_PATH']
-    arquivo.save(f'{upload_path}/capa{novo_jogo.id}.jpg')
+    timestamp = time.time()
+    arquivo.save(f'{upload_path}/capa{novo_jogo.id}-{timestamp}.jpg')
     
     return redirect(url_for('index'))
 
@@ -55,6 +60,12 @@ def atualizar():
     
     db.session.add(jogo)
     db.session.commit()
+    
+    arquivo = request.files['arquivo']
+    upload_path = app.config['UPLOAD_PATH']
+    timestamp = time.time()
+    deleta_arquivo(jogo.id)
+    arquivo.save(f'{upload_path}/capa{jogo.id}-{timestamp}.jpg')
     
     return redirect(url_for('index'))
 
