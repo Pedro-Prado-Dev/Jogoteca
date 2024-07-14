@@ -5,7 +5,9 @@ from model import Jogos
 from model import Usuarios
 from helpers import recupera_imagem
 from helpers import deleta_arquivo
+from helpers import FormularioJogo
 import time
+import pprint
 
 
 @app.route('/')
@@ -17,7 +19,9 @@ def index():
 def new():
     if 'user_loguin' not in session or session['user_loguin'] == None:
         return redirect(url_for('login', next_page=url_for('new')))
-    return render_template('new.html', titulo='Novo Jogo')
+    
+    form = FormularioJogo()
+    return render_template('new.html', titulo='Novo Jogo', form=form)
 
 @app.route('/editar/<int:id>')
 def editar(id):
@@ -25,14 +29,25 @@ def editar(id):
         return redirect(url_for('login', next_page=url_for('editar')))
     
     jogo = Jogos.query.filter_by(id=id).first()
+    form = FormularioJogo(request.form)
+    
+    form.nome.data = jogo.nome
+    form.categoria.data = jogo.categoria
+    form.console.data = jogo.console
+    
     capa_jogo = recupera_imagem(id=id)
-    return render_template('editar.html', titulo='Editando Jogo', jogo=jogo, capa_jogo=capa_jogo)
+    return render_template('editar.html', titulo='Editando Jogo', id=id, capa_jogo=capa_jogo, form=form)
 
 @app.route('/create',methods=['POST'])
 def create():
-    nome = request.form['nome']
-    categoria = request.form['categoria']
-    console = request.form['console']
+    form = FormularioJogo(request.form)
+    
+    if not form.validate_on_submit():
+        return redirect(url_for('new'))
+    
+    nome = form.nome.data
+    categoria = form.categoria.data
+    console = form.console.data
     
     jogo = Jogos.query.filter_by(nome=nome).first()
     if jogo:
@@ -53,19 +68,21 @@ def create():
 @app.route('/atualizar',methods=['POST'])
 def atualizar():
     jogo = Jogos.query.filter_by(id=request.form['id']).first()
+    form = FormularioJogo(request.form)
     
-    jogo.nome = request.form['nome']
-    jogo.categoria = request.form['categoria']
-    jogo.console = request.form['console']
-    
-    db.session.add(jogo)
-    db.session.commit()
-    
-    arquivo = request.files['arquivo']
-    upload_path = app.config['UPLOAD_PATH']
-    timestamp = time.time()
-    deleta_arquivo(jogo.id)
-    arquivo.save(f'{upload_path}/capa{jogo.id}-{timestamp}.jpg')
+    if form.validate_on_submit():
+        jogo.nome = form.nome.data
+        jogo.categoria = form.categoria.data
+        jogo.console = form.console.data
+        
+        db.session.add(jogo)
+        db.session.commit()
+        
+        arquivo = request.files['arquivo']
+        upload_path = app.config['UPLOAD_PATH']
+        timestamp = time.time()
+        deleta_arquivo(jogo.id)
+        arquivo.save(f'{upload_path}/capa{jogo.id}-{timestamp}.jpg')
     
     return redirect(url_for('index'))
 
