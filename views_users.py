@@ -2,6 +2,7 @@ from flask import render_template, request, redirect, session, flash, url_for
 from helpers import FormularioUsuario
 from model import Usuarios
 from jogoteca import app
+from flask_bcrypt import check_password_hash
 
 @app.route('/login')
 def login():
@@ -13,13 +14,14 @@ def login():
 def authenticate():
     form = FormularioUsuario(request.form)
     usuario = Usuarios.query.filter_by(nickname=form.nickname.data).first()
+    senha = check_password_hash(usuario.senha, form.senha.data)
     
-    if usuario:
-        if form.senha.data == usuario.senha :
-            session['user_loguin'] = usuario.nickname
-            flash(usuario.nickname + ' Usuario logado com sucesso')
-            next_page = request.form['next_page'] if request.form['next_page'] != 'None' else '/'
-            return redirect(next_page)
+    if usuario and senha:
+        
+        session['user_loguin'] = usuario.nickname
+        flash(usuario.nickname + ' Usuario logado com sucesso')
+        next_page = request.form['next_page'] if request.form['next_page'] != 'None' else '/'
+        return redirect(next_page)
 
     else:
         flash('Usuario não existente')
