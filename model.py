@@ -11,7 +11,7 @@ class Jogos(db.Model):
     
 
 class Usuarios(db.Model):
-    nickname = db.Column(db.String(8), primary_key=True, autoincrement = True)
+    nickname = db.Column(db.String(80),primary_key=True, nullable = False)
     nome = db.Column(db.String(80), nullable = False)
     senha = db.Column(db.String(100), nullable = False)
     
