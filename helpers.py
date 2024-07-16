@@ -11,11 +11,17 @@ class FormularioJogo(FlaskForm):
     salvar = SubmitField('Salvar')
         
 
-class FormularioUsuario(FlaskForm):
+class FormularioLogin(FlaskForm):
     nickname = StringField('Nickname', [validators.DataRequired(), validators.Length(min=1,max=8)])
     senha = PasswordField('Senha', [validators.DataRequired(), validators.Length(min=1,max=100)])
     login = SubmitField('Login')
 
+class FormularioUser(FlaskForm):
+    nome = StringField('Nome', [validators.DataRequired(), validators.Length(min=1,max=50)])
+    nickname = StringField('Nickname', [validators.DataRequired(), validators.Length(min=1,max=8)])
+    senha = PasswordField('Senha', [validators.DataRequired(), validators.Length(min=1,max=100)])
+    senha_confirmada = PasswordField('Confirme a Senha', [validators.DataRequired(), validators.Length(min=1,max=100)])
+    cadastrar = SubmitField('Cadastrar')
 
 def recupera_imagem(id):
     for nome_arquivo in os.listdir(app.config['UPLOAD_PATH']):
