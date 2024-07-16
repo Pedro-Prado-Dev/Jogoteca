@@ -1,0 +1,32 @@
+{% extends "template.html" %}
+
+{% block conteudo %}
+    <div class="container">
+
+        <h1>Crie seu Usuario</h1>
+        <form method="POST" action="{{ url_for('cria_usuario') }}">
+            <input type='hidden' name='next_page' value='{{ next_page }}'>
+            {{ form.csrf_token() }}
+            <div class="form-group">
+                {{ form.nome.label(class="form-label")}}
+                {{ form.nome(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.nickname.label(class="form-label")}}
+                {{ form.nickname(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.senha.label(class="form-label")}}
+                {{ form.senha(class="form-control") }}
+            </div>
+            <div class="form-group">
+                {{ form.senha_confirmada.label(class="form-label")}}
+                {{ form.senha_confirmada(class="form-control") }}
+            </div>
+            <div class="form-group buttons">
+                {{ form.cadastrar(class="btn btn-primary") }}
+                <a class="btn btn-danger" href="{{ url_for('index')}}">Voltar</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}
